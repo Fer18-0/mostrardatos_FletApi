@@ -32,11 +32,40 @@ def products_view(page:ft.Page) -> ft.Control:
     #Se crea la tabla con los encabezados(columnas) y los datos de prueba(data) 
     tabla=ft.DataTable( 
         columns=columnas, 
-        rows=data, width=900, 
+        rows=data, 
+        width=900, 
         heading_row_height=60, 
         heading_row_color=Colors.BG, 
         data_row_max_height=60, 
         data_row_min_height=48
         )
+    #return tabla
+
+    async def actualizar_data():
+        nonlocal rows_data, total_items
+        try:
+            data=list_products(limit=500, offset=0) # se conecta a transaccines_api_productos para obtener los product
+            total_items=int(data.get("total", 0)) 
+            #print(total_items)
+            total_text.value="Total de productos: "+str(total_items)
+            rows_data=data.get("items", []) or []
+            actualizar_filas()
+        except Exception as ex:
+            await show_snackbar(page, "Error al cargar productos: "+str(ex), bgcolor=Colors.DANGER)  
+    
+    def actualizar_filas():
+        nuevas_filas=[]
+        for p in rows_data: 
+            nuevas_filas.append( 
+                ft.DataRow( 
+                    cells=[ 
+                        ft.DataCell(ft.Text(p.get("name", ""))), 
+                        ft.DataCell(ft.Text(str(p.get("quantity", "")))),
+                        ft.DataCell(ft.Text(p.get("ingreso_date", ""))), 
+                        ft.DataCell(ft.Text(str(p.get("min_stock", "")))), 
+                        ft.DataCell(ft.Text(str(p.get("max", "")))), ])) 
+        tabla.rows=nuevas_filas
+        page.update()
+    page.run_task(actualizar_data)
     return tabla
 

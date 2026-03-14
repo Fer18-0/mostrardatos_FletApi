@@ -6,7 +6,7 @@ class Colors:
     BORDER = "#26378E"
     TEXT = "#575758"
     PRIMARY = "#334ACA"
-    SUCCESS = "#047B08"  # ✔ Se agregó #
+    SUCCESS = "#047B08"  
     INFO = "#04B4FA"
     DANGER = "#FF0000"
     WHITE = "#FFFFFF"
@@ -35,7 +35,7 @@ class inputs:
 class Buttons:
     BUTTON_PRIMARY = ft.ButtonStyle(
         bgcolor=Colors.PRIMARY,
-        color=Colors.WHITE,  # ✔ corregido white
+        color=Colors.WHITE,  
         shape=ft.RoundedRectangleBorder(radius=5),
         padding=10,
         text_style=Textos.text
@@ -43,7 +43,7 @@ class Buttons:
 
     BUTTON_SUCCESS = ft.ButtonStyle(
         bgcolor=Colors.SUCCESS,
-        color=Colors.WHITE,  # ✔ corregido white
+        color=Colors.WHITE,  
         shape=ft.RoundedRectangleBorder(radius=5),
         padding=10,
         text_style=Textos.text
