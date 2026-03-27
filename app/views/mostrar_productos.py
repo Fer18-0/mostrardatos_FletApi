@@ -44,14 +44,19 @@ def products_view(page:ft.Page) -> ft.Control:
     async def actualizar_data():
         nonlocal rows_data, total_items
         try:
-            data=list_products(limit=500, offset=0) # se conecta a transaccines_api_productos para obtener los product
+            data=list_products(limit=200, offset=0) # se conecta a transaccines_api_productos para obtener los product
             total_items=int(data.get("total", 0)) 
             #print(total_items)
             total_text.value="Total de productos: "+str(total_items)
             rows_data=data.get("items", []) or []
             actualizar_filas()
         except Exception as ex:
-            await show_snackbar(page, "Error al cargar productos: "+str(ex), bgcolor=Colors.DANGER)  
+            await show_snackbar(
+                page=page,
+                title="Error",
+                message="Error al cargar productos: " + str(ex),
+                bgcolor=Colors.DANGER
+            )
     
     def actualizar_filas():
         nuevas_filas=[]
@@ -67,5 +72,25 @@ def products_view(page:ft.Page) -> ft.Control:
         tabla.rows=nuevas_filas
         page.update()
     page.run_task(actualizar_data)
-    return tabla
+    #return tabla
+    #se prepara un sistema de columnas para mostrar tanto el total de registros y
+    #la tabla y con un mejor formato
+    #Cuando se necesita el scroll también se muestra
+    btn_nuevo = ft.ElevatedButton(
+    "Nuevo producto",
+    icon=ft.Icons.ADD,
+    on_click=lambda e: print("Click"))
+    contenido = ft.Column(
+    #Se crea un espacio entra cada elemento 
+        spacing=30, 
+        #Cuando no caben los elementos se genera el scroll 
+        scroll=ft.ScrollMode.AUTO, 
+        #Se establecen tanto el total como la tabla para mostrar 
+        ######## Se agrega el botón de nuevo registro ######### 
+        controls=[btn_nuevo,total_text,ft.Container(content=tabla)]
+    )
+#Se muestra esa columna
+    return contenido
+
+
 

@@ -2,14 +2,14 @@
 import requests 
 from app.components.error import ApiError 
 
-BASE ="http://localhost:8000/products" 
+BASE ="http://localhost:8000/productos" 
 TIME_OUT=10 
 
 #Obtiene la lista de productos de FastAPI 
 def list_products(limit:int=20, offset:int=0) -> dict: 
     try: 
         #request.get se conecta al api y entrega la información en r 
-        r=requests.get(f"{BASE}/", params={"limit": limit, "offset": offset}, timeout=TIME_OUT) 
+        r=requests.get(f"{BASE}/", params={"limit": limit, "offset": offset}) 
         #si el status code es cualquier código 200 se entrega el resultado en formato json 
         if 200 <= r.status_code < 300: 
             return r.json() if r.content else {} 
