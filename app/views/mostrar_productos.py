@@ -92,10 +92,12 @@ def products_view(page:ft.Page) -> ft.Control:
 #Se muestra esa columna
     #return contenido
         # Tarjeta
-    tarjeta = ft.Container(
+    tarjeta = ft.Card(
+        content=ft.Container(
             content=contenido,
-            **Card.tarjeta
+            padding=20
         )
+    )
     final = ft.Container(
             expand=True,
             alignment=ft.Alignment(0, -1),
