@@ -36,6 +36,20 @@ def products_view(page:ft.Page) -> ft.Control:
             page, on_submit=editar_producto, initial=p
         )
         open_()
+    async def borrar_producto(p: dict[str, Any]):
+            try:
+                await delete_product(p["id"])
+                await show_snackbar(page, "Éxito", "Producto eliminado", bgcolor=Colors.SUCCESS)
+                await actualizar_data()
+            except ApiError as ex:
+                await show_popup(page, "Error", api_error_to_text(ex))
+            except Exception as ex:
+                await show_snackbar(page, "Error", str(ex), bgcolor=Colors.DANGER)
+
+    def inicio_eliminar_producto(p: dict[str, Any]):
+            async def tarea():
+                await borrar_producto(p)
+            page.run_task(tarea)
 
 
     btn_nuevo = ft.Button("Nuevo producto",icon=ft.Icons.ADD,on_click=inicio_nuevo_producto)
@@ -115,11 +129,11 @@ def products_view(page:ft.Page) -> ft.Control:
                                         tooltip="Editar",
                                         on_click=lambda e, p=p: inicio_editar_producto(p)
                                     ),
-                                    #ft.IconButton(
-                                        #icon=ft.Icons.DELETE,
-                                        #tooltip="Eliminar",
-                                        #on_click=lambda e, p=p: inicio_eliminar_producto(p)
-                                    #)
+                                    ft.IconButton(
+                                        icon=ft.Icons.DELETE,
+                                        tooltip="Eliminar",
+                                        on_click=lambda e, p=p: inicio_eliminar_producto(p)
+                                    )
                                 ]
                             )
                         ), ])) 
