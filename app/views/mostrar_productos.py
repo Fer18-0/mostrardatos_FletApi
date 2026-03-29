@@ -4,8 +4,23 @@ from app.services.transacciones_api_productos import list_products, get_product,
 from app.components.popup import show_popup, show_popup_auto_close, show_snackbar, confirm_dialog
 from app.components.error import ApiError, api_error_to_text
 from app.styles.estilos import Colors, Textos, Card
+from app.views.nuevo_editar import formulario_nuevo_editar_producto
 
 def products_view(page:ft.Page) -> ft.Control: 
+    def inicio_nuevo_producto(_e):
+        async def crear_nuevo_producto(data:dict):
+            try:
+                await create_product(data) 
+                await show_snackbar(page, "Éxito", "Producto creado.", bgcolor=Colors.SUCCESS) 
+                await actualizar_data() 
+            except ApiError as ex: 
+                await show_popup(page, "Error", api_error_to_text(ex)) 
+            except Exception as ex: 
+                await show_snackbar(page, "Error", str(ex), bgcolor=Colors.DANGER)
+
+        dlg, open_, close = formulario_nuevo_editar_producto(page, on_submit=crear_nuevo_producto, initial=None) 
+        open_() 
+    btn_nuevo = ft.Button("Nuevo producto",icon=ft.Icons.ADD,on_click=inicio_nuevo_producto)
     rows_data:list[dict[str,Any]]=[]
     total_items=0 
     total_text = ft.Text("Total de productos: (cargando...)", style=Textos.H3) 
@@ -68,7 +83,7 @@ def products_view(page:ft.Page) -> ft.Control:
                         ft.DataCell(ft.Text(str(p.get("quantity", "")))),
                         ft.DataCell(ft.Text(p.get("ingreso_date", ""))), 
                         ft.DataCell(ft.Text(str(p.get("min_stock", "")))), 
-                        ft.DataCell(ft.Text(str(p.get("max", "")))), ])) 
+                        ft.DataCell(ft.Text(str(p.get("max_stock", "")))), ])) 
         tabla.rows=nuevas_filas
         page.update()
     page.run_task(actualizar_data)
@@ -76,10 +91,7 @@ def products_view(page:ft.Page) -> ft.Control:
     #se prepara un sistema de columnas para mostrar tanto el total de registros y
     #la tabla y con un mejor formato
     #Cuando se necesita el scroll también se muestra
-    btn_nuevo = ft.ElevatedButton(
-    "Nuevo producto",
-    icon=ft.Icons.ADD,
-    on_click=lambda e: print("Click"))
+
     contenido = ft.Column(
     #Se crea un espacio entra cada elemento 
         spacing=30, 
@@ -91,21 +103,17 @@ def products_view(page:ft.Page) -> ft.Control:
     )
 #Se muestra esa columna
     #return contenido
-        # Tarjeta
-    tarjeta = ft.Card(
-        content=ft.Container(
-            content=contenido,
-            padding=20
-        )
+    # Tarjeta
+    tarjeta = ft.Container(
+        content=contenido,
+        **Card.tarjeta
     )
     final = ft.Container(
-            expand=True,
-            alignment=ft.Alignment(0, -1),
-            content=tarjeta
-        )
-
+        expand=True,
+        alignment=ft.Alignment(0, -1),
+        content=tarjeta
+    )
     return final
-
 
 
 
