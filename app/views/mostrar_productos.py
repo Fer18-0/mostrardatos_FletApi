@@ -20,6 +20,24 @@ def products_view(page:ft.Page) -> ft.Control:
 
         dlg, open_, close = formulario_nuevo_editar_producto(page, on_submit=crear_nuevo_producto, initial=None) 
         open_() 
+    def inicio_editar_producto(p: dict[str, Any]):
+        async def editar_producto(data: dict):
+            try:
+                await update_product(p["id"], data)
+                close()
+                await show_snackbar(page, "Éxito", "Producto actualizado", bgcolor=Colors.SUCCESS)
+                await actualizar_data()
+            except ApiError as ex:
+                await show_popup(page, "Error", api_error_to_text(ex))
+            except Exception as ex:
+                await show_snackbar(page, "Error", str(ex), bgcolor=Colors.DANGER)
+
+        dlg, open_, close = formulario_nuevo_editar_producto(
+            page, on_submit=editar_producto, initial=p
+        )
+        open_()
+
+
     btn_nuevo = ft.Button("Nuevo producto",icon=ft.Icons.ADD,on_click=inicio_nuevo_producto)
     rows_data:list[dict[str,Any]]=[]
     total_items=0 
@@ -30,6 +48,8 @@ def products_view(page:ft.Page) -> ft.Control:
         ft.DataColumn(label=ft.Text("Ingreso", style=Textos.H3)), 
         ft.DataColumn(label=ft.Text("Min", style=Textos.H3)), 
         ft.DataColumn(label=ft.Text("Max", style=Textos.H3)),
+        ft.DataColumn(label=ft.Text("Acciones", style=Textos.H3)), 
+        
     ]
 
     #Se definen las filas de la tabla 
@@ -42,7 +62,8 @@ def products_view(page:ft.Page) -> ft.Control:
                 ft.DataCell(ft.Text("cantidad1...")),
                 ft.DataCell(ft.Text("ingreso1...")), 
                 ft.DataCell(ft.Text("min1...")), 
-                ft.DataCell(ft.Text("max1...")), ]))
+                ft.DataCell(ft.Text("max1...")),
+                ft.DataCell(ft.Text("...")), ]))
 
     #Se crea la tabla con los encabezados(columnas) y los datos de prueba(data) 
     tabla=ft.DataTable( 
@@ -73,6 +94,7 @@ def products_view(page:ft.Page) -> ft.Control:
                 bgcolor=Colors.DANGER
             )
     
+    
     def actualizar_filas():
         nuevas_filas=[]
         for p in rows_data: 
@@ -83,7 +105,24 @@ def products_view(page:ft.Page) -> ft.Control:
                         ft.DataCell(ft.Text(str(p.get("quantity", "")))),
                         ft.DataCell(ft.Text(p.get("ingreso_date", ""))), 
                         ft.DataCell(ft.Text(str(p.get("min_stock", "")))), 
-                        ft.DataCell(ft.Text(str(p.get("max_stock", "")))), ])) 
+                        ft.DataCell(ft.Text(str(p.get("max_stock", "")))), 
+                        ft.DataCell(
+                            ft.Row(
+                                spacing=10,
+                                controls=[
+                                    ft.IconButton(
+                                        icon=ft.Icons.EDIT,
+                                        tooltip="Editar",
+                                        on_click=lambda e, p=p: inicio_editar_producto(p)
+                                    ),
+                                    #ft.IconButton(
+                                        #icon=ft.Icons.DELETE,
+                                        #tooltip="Eliminar",
+                                        #on_click=lambda e, p=p: inicio_eliminar_producto(p)
+                                    #)
+                                ]
+                            )
+                        ), ])) 
         tabla.rows=nuevas_filas
         page.update()
     page.run_task(actualizar_data)
